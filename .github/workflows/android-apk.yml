@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
       - name: Checkout source
@@ -21,11 +21,17 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Android SDK packages
+      - name: Configure Android SDK
         run: |
-          echo "Android SDK: $ANDROID_HOME"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> "$GITHUB_PATH"
+          echo "$ANDROID_HOME/platform-tools" >> "$GITHUB_PATH"
+          ls -la "$ANDROID_HOME/cmdline-tools"
+
+      - name: Verify SDK Manager
+        run: |
           sdkmanager --version
-          yes | sdkmanager --licenses || true
+          yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Setup Gradle
@@ -41,3 +47,4 @@ jobs:
         with:
           name: DigitalChopda-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
+concurrency: 
