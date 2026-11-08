@@ -23,6 +23,13 @@ android {
         jvmTarget = "17"
     }
 
+
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+        }
+    }
+
 }
 dependencies {
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
