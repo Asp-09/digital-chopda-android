@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "931380353286",
+    "project_id": "digital-chopda",
+    "storage_bucket": "digital-chopda.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:931380353286:android:3d0c65179a7184cd6fa687",
+        "android_client_info": {
+          "package_name": "com.digitalchopda.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5zUNyVYtJ_mfGJpmahRQmHVwaEYRgSto"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
