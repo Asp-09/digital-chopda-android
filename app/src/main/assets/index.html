@@ -16,7 +16,7 @@
 <div class="privacy">🔒 Privacy: તમારો ડેટા આ ડિવાઇસના બ્રાઉઝરમાં જ રહે છે. કોઈ એકાઉન્ટ, સર્વર કે ટ્રેકિંગ નથી. નિયમિત Backup ડાઉનલોડ કરો.</div>
 <nav class="tabs">
 <button class="tab active" data-page="home">ચોપડા વિગતો</button><button class="tab" data-page="parties">ગ્રાહક ખાતા</button><button class="tab" data-page="entry">નવી એન્ટ્રી</button><button class="tab" data-page="ledger">રોજની બહી</button><button class="tab" data-page="reports">રિપોર્ટ</button><button class="tab" data-page="book">પૂર્ણ ચોપડો / PDF</button><button class="tab" data-page="backup">Backup</button>
-</nav>
+<button class="tab" data-page="employees">કર્મચારી</button></nav>
 <section class="page active" id="homePage">
 <div class="grid"><div class="panel no-print"><h2>ચોપડાની વિગતો</h2>
 <div class="field"><label>ભાષા / Language</label><select id="lang"><option value="gu">ગુજરાતી</option><option value="hi">हिंदी</option><option value="en">English</option></select></div>
@@ -41,6 +41,39 @@
 <section class="page" id="bookPage"><div class="panel no-print"><div class="toolbar"><div><h2>પૂર્ણ ચોપડો / PDF</h2><p class="muted">કવર પેજ, શરૂઆતનું બેલેન્સ અને તારીખવાર બધી એન્ટ્રીઓ પ્રિન્ટ કરો.</p></div><button class="btn primary" id="printBook">પ્રિન્ટ / PDF સેવ કરો</button></div><p class="muted">પ્રિન્ટ વિન્ડોમાં Destination તરીકે “Save as PDF” પસંદ કરો.</p></div><div class="print-area" id="printArea"></div></section>
 <section class="page" id="backupPage"><div class="grid"><div class="panel"><h2>Backup અને Restore</h2><p class="muted">તમારો ડેટા આ જ બ્રાઉઝરમાં છે. JSON ફાઇલથી બીજા ડિવાઇસમાં Restore કરી શકો છો.</p><div class="actions"><button class="btn primary" id="backupJson">↓ JSON Backup</button><button class="btn goldbtn" id="backupCsv">↓ Excel CSV</button></div><div class="field" style="margin-top:16px"><label>Backup Restore (JSON)</label><input id="restoreFile" type="file" accept=".json,application/json"></div><div class="toast" id="backupToast"></div></div><div class="panel"><h2>ડેટા મેનેજમેન્ટ</h2><p class="muted">બધો ડેટા કાઢી નાખતા પહેલાં Backup ડાઉનલોડ કરો. આ ક્રિયા પાછી ફેરવી શકાશે નહીં.</p><button class="btn danger" id="wipe">બધો ડેટા કાઢી નાખો</button></div></div></section>
 <p class="muted" style="text-align:center">Offline-first • No login • No analytics • Your data stays on your device</p>
+
+<section class="page" id="employeesPage">
+  <div class="panel">
+    <h2>કર્મચારી વ્યવસ્થાપન / Employee Management</h2>
+    <div class="field">
+      <label>કર્મચારીનું નામ / Employee Name</label>
+      <input id="empName" maxlength="80" placeholder="કર્મચારીનું નામ">
+    </div>
+    <div class="field">
+      <label>મોબાઇલ નંબર / Mobile</label>
+      <input id="empPhone" type="tel" maxlength="15" placeholder="મોબાઇલ નંબર">
+    </div>
+    <div class="two">
+      <div class="field">
+        <label>વેતન / Salary (₹)</label>
+        <input id="empSalary" type="number" min="0" step="0.01" placeholder="0">
+      </div>
+      <div class="field">
+        <label>વેતનનો પ્રકાર / Salary Type</label>
+        <select id="empType">
+          <option value="monthly">માસિક / Monthly</option>
+          <option value="daily">દૈનિક / Daily</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn primary" id="addEmployee" type="button">+ કર્મચારી ઉમેરો / Add Employee</button>
+    <div class="toast" id="employeeToast"></div>
+  </div>
+  <div class="panel">
+    <h2>કર્મચારી યાદી / Employee List</h2>
+    <div id="employeeList" class="muted">હજુ કોઈ કર્મચારી ઉમેર્યો નથી.</div>
+  </div>
+</section>
 </main>
 <script>
 (()=>{'use strict';
@@ -55,7 +88,7 @@ function sortEntries(list){return [...list].sort((a,b)=>a.date.localeCompare(b.d
 function totals(list=db.entries){let inc=0,out=0;list.forEach(e=>e.type==='in'?inc+=+e.amount:out+=+e.amount);return {inc,out,net:inc-out,balance:(+db.settings.opening||0)+inc-out}}
 function partyTotals(id){let a=db.entries.filter(e=>e.partyId===id);return totals(a)}
 function notify(id,msg){$(id).textContent=msg;setTimeout(()=>{if($(id))$(id).textContent=''},3500)}
-function setTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===name));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name+'Page'));if(name==='book')renderPrint();if(name==='parties')renderParties();if(name==='ledger')renderLedger()}
+function setTab(name){document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.page===name));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===name+'Page'));if(name==='book')renderPrint();if(name==='employees')renderEmployees();if(name==='parties')renderParties();if(name==='ledger')renderLedger()}
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>setTab(b.dataset.page)));
 function syncSettings(){let s=db.settings;['firm','owner','samvat','year','start','opening','lang'].forEach(k=>$(k).value=s[k]??'');$('cFirm').textContent=s.firm||'________________';$('cOwner').textContent=s.owner||'________________';$('cSamvat').textContent=s.samvat;$('cYear').textContent=s.year}
 $('saveSettings').onclick=()=>{['firm','owner','samvat','year','start'].forEach(k=>db.settings[k]=$(k).value.trim());db.settings.opening=Math.max(0,Number($('opening').value)||0);db.settings.lang=$('lang').value;save();syncSettings();renderAll();notify('homeToast','ચોપડાની વિગતો સેવ થઈ ગઈ.')};
@@ -84,6 +117,62 @@ function download(name,content,type){let blob=new Blob([content],{type}),url=URL
 $('backupJson').onclick=()=>download('DigitalChopda-Backup-'+today()+'.json',JSON.stringify(db,null,2),'application/json');
 $('backupCsv').onclick=()=>{let rows=[['Date','Description','Party','Type','Amount','Mode','Voucher','Note']];sortEntries(db.entries).forEach(e=>rows.push([e.date,e.desc,db.parties.find(p=>p.id===e.partyId)?.name||'',e.type,e.amount,e.mode,e.ref,e.note]));let csv='\ufeff'+rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');download('DigitalChopda-'+today()+'.csv',csv,'text/csv;charset=utf-8')};
 $('restoreFile').onchange=async e=>{let f=e.target.files[0];if(!f)return;try{let x=JSON.parse(await f.text());if(!x.settings||!Array.isArray(x.entries)||!Array.isArray(x.parties))throw 0;if(!confirm('હાલની બહીને Backup થી બદલવી?'))return;db=x;save();syncSettings();renderAll();notify('backupToast','Backup Restore થઈ ગયો.')}catch(err){notify('backupToast','આ Backup ફાઇલ યોગ્ય નથી.')}e.target.value=''};
+
+function renderEmployees(){
+  if(!Array.isArray(db.employees)) db.employees=[];
+  const box=$('employeeList');
+  if(!box) return;
+  if(!db.employees.length){
+    box.textContent='હજુ કોઈ કર્મચારી ઉમેર્યો નથી.';
+    return;
+  }
+  box.innerHTML=db.employees.map(e=>`
+    <div class="panel" style="margin-top:10px">
+      <b>${esc(e.name)}</b>
+      <div class="muted">${esc(e.phone||'-')}</div>
+      <div>${money(e.salary)} / ${e.type==='daily'?'દિવસ':'મહિનો'}</div>
+      <button class="btn danger" type="button" data-del-employee="${esc(e.id)}">કર્મચારી દૂર કરો / Remove</button>
+    </div>
+  `).join('');
+}
+function addEmployee(){
+  const name=$('empName').value.trim();
+  const phone=$('empPhone').value.trim();
+  const salary=Number($('empSalary').value);
+  const type=$('empType').value;
+  if(!name){notify('employeeToast','કર્મચારીનું નામ લખો.');return;}
+  if(!Number.isFinite(salary)||salary<=0){
+    notify('employeeToast','યોગ્ય વેતન લખો.');return;
+  }
+  if(!Array.isArray(db.employees)) db.employees=[];
+  db.employees.push({
+    id:String(Date.now()),
+    name:name,
+    phone:phone,
+    salary:salary,
+    type:type,
+    created:today()
+  });
+  if(!save()){
+    db.employees.pop();
+    return;
+  }
+  $('empName').value='';
+  $('empPhone').value='';
+  $('empSalary').value='';
+  renderEmployees();
+  notify('employeeToast','કર્મચારી સફળતાપૂર્વક ઉમેરાયો.');
+}
+$('addEmployee').onclick=addEmployee;
+$('employeeList').onclick=e=>{
+  const b=e.target.closest('[data-del-employee]');
+  if(!b)return;
+  if(!confirm('આ કર્મચારીને દૂર કરવો છે?'))return;
+  db.employees=(db.employees||[]).filter(x=>x.id!==b.dataset.delEmployee);
+  save();
+  renderEmployees();
+};
+
 $('wipe').onclick=()=>{if(!confirm('શું ખરેખર બધો ડેટા કાઢી નાખવો છે? પહેલાં Backup લો.'))return;localStorage.removeItem(KEY);db={settings:{lang:'gu',firm:'',owner:'',samvat:'૨૦૮૩',year:'2026–2027',start:today(),opening:0},parties:[],entries:[]};syncSettings();renderAll();alert('ડેટા કાઢી નાખ્યો.')};
 load();$('eDate').value=today();$('start').value=db.settings.start||today();$('reportFrom').value=new Date(new Date().getFullYear(),0,1).toISOString().slice(0,10);$('reportTo').value=today();syncSettings();renderAll();runReport();
 })();
